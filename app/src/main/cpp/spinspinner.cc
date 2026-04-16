@@ -1,8 +1,10 @@
 #include "spinspinner.hh"
+#include "easyrandom.hh"
 
-SpinSpinner::SpinSpinner(bool defaultDirection)
+SpinSpinner::SpinSpinner(bool defaultDirection, bool normalize)
 {
     this->defaultDirection = defaultDirection;
+    this->normalize = normalize;
 }
 void SpinSpinner::spin()
 {
@@ -28,7 +30,7 @@ void SpinSpinner::spin()
             currentSpin.baseType = 'k';
             break;
         default:
-            throw;
+            currentSpin.baseType = 'e';
     }
 
     setRandomBaseQualities(); //sets fly and change foot properties
@@ -59,7 +61,7 @@ void SpinSpinner::spin(int level)
             currentSpin.baseType = 'k';
             break;
         default:
-            throw;
+            currentSpin.baseType = 'e';
     }
 
     setRandomBaseQualities(); //sets fly and change foot properties
@@ -90,8 +92,6 @@ void SpinSpinner::generateSpin()
     {
         generateCombo();
     }
-    else
-        throw;
 }
 void SpinSpinner::generateSpinInOnePosition()
 {
@@ -114,7 +114,7 @@ void SpinSpinner::generateCombo()
         randomStartPosition = easyRandom::pickFromVectorWeighted(std::vector<int>{'c','s','u'},std::vector<double>{COMBO_START_CAMEL_PROB,COMBO_START_SIT_PROB,COMBO_START_UPRIGHT_PROB});
 
     //push first segment and position
-    currentSpin.spinSegments.at(0).spinPositions.push_back(SpinPosition(randomStartPosition));
+    currentSpin.spinSegments.at(0).spinPositions.push_back(SpinPosition(&currentSpin.spinSegments.at(0),randomStartPosition));
 
     //Logic to add the rest of the positions
     generateComboPositions();
@@ -189,10 +189,10 @@ void SpinSpinner::generateComboPositions_addPosition(bool swappedFeet)
 
     if(currentSegment->spinPositions.size()==3 || currentSpin.spinSegments.size()>2) //If this is true then it would imply that we are trying to add a 4th basic position to the same foot OR add a third segment, which wouldn't make sense
     {
-        throw;
+        return;
     }
 
-    char nextPosition = '\0';
+    char nextPosition;
     if(targetLevel>=1) //combo spins level 1 or higher can have a difficult change of position so the logic is more lax (i.e. there are more posibilities)
     {
         std::vector<char> validPositions = {'c','s','u'};
@@ -214,6 +214,14 @@ void SpinSpinner::generateComboPositions_addPosition(bool swappedFeet)
         }
 
         nextPosition = easyRandom::pickFromVectorWeighted(unusedPositions,positionWeightsForUnusedPositions);
+
+        //check and update difficult change of position flag
+        if(!currentSegment->spinPositions.empty())
+        {
+            char previousPosition = currentSegment->spinPositions.at(currentSegment->spinPositions.size()-1).position;
+            if((previousPosition=='s'||previousPosition=='u')&&nextPosition=='c')
+                currentSegment->features.difficultChangeOfPosition = true;
+        }
     }
     else //there is a small amount of base combos that can be rolled so the logic is a bit simpler. Note: intermediate positions aren't valid for a base spin
     {
@@ -249,7 +257,7 @@ void SpinSpinner::generateComboPositions_addPosition(bool swappedFeet)
                 nextPosition = 'u';
         }
     }
-    currentSegment->spinPositions.push_back(SpinPosition(nextPosition));
+    currentSegment->spinPositions.push_back(SpinPosition(currentSegment,nextPosition));
 }
 void SpinSpinner::setRandomBaseQualities()
 {
@@ -298,10 +306,6 @@ void SpinSpinner::initializeBaseStructure()
 {
     char startingFootness;
     char otherFootness;
-    std::vector<SpinPosition> startingPositions = {};
-
-    if(currentSpin.baseType!='k')
-        startingPositions.push_back(SpinPosition(currentSpin.baseType));
 
     if(easyRandom::range(0,1))
     {
@@ -316,11 +320,20 @@ void SpinSpinner::initializeBaseStructure()
 
     if(currentSpin.isChangeFoot)
     {
-        currentSpin.spinSegments.push_back(SpinSegment(defaultDirection,startingFootness,startingPositions));
-        currentSpin.spinSegments.push_back(SpinSegment(defaultDirection,otherFootness,startingPositions));
+        currentSpin.spinSegments.push_back(SpinSegment(defaultDirection,startingFootness));
+        currentSpin.spinSegments.push_back(SpinSegment(defaultDirection,otherFootness));
     }
     else
-        currentSpin.spinSegments.push_back(SpinSegment(defaultDirection,startingFootness,startingPositions));
+        currentSpin.spinSegments.push_back(SpinSegment(defaultDirection,startingFootness));
+
+    if(currentSpin.baseType!='k')
+    {
+        for(size_t i=0;i<currentSpin.spinSegments.size();i++)
+        {
+            SpinSegment* currentSegment = &currentSpin.spinSegments.at(i);
+            currentSegment->spinPositions.push_back(SpinPosition(currentSegment,currentSpin.baseType));
+        }
+    }
 }
 void SpinSpinner::addLevel()
 {
@@ -396,8 +409,6 @@ void SpinSpinner::addLevel()
                     else
                         continue;
                 }
-                else
-                    throw; //implies that randomSelect is outside of possible spin additions (this would be a bug)
             }
         }
         currentSpin.level++;
@@ -409,7 +420,7 @@ bool SpinSpinner::addVariation()
     char randomVariation = randomPosition->pickRandomVariation();
     if(currentSpin.level==0)
     {
-        randomPosition->variations.push_back(randomVariation);
+        randomPosition->addVariation(randomVariation,normalize);
         return true;
     }
     else //check for rule conflicts
@@ -424,10 +435,13 @@ bool SpinSpinner::addVariation()
                 return false;
             else
             {
-                randomPosition->variations.push_back(randomVariation);
-                if(currentSpin.hasTwoVariations())
-                    currentSpin.twoVariationsFlag = true;
-                return true;
+                if(randomPosition->addVariation(randomVariation,normalize))
+                {
+                    if(currentSpin.hasTwoVariations())
+                        currentSpin.twoVariationsFlag = true;
+                    return true;
+                }
+                return false;
             }
         }
     }
@@ -445,6 +459,8 @@ bool SpinSpinner::addSpinFeature()
     randomSelect = easyRandom::range(tempLowerRandomRange,tempUpperRandomRange);
     if(randomSelect==0 && !currentSpin.features.changeFootByJump) //changeFootByJump
     {
+        if(shouldAvoidChangeFootByJump()) //avoid change foot by jump if there is change of direction or awkward positions
+            return false;
         currentSpin.features.changeFootByJump = true;
         return true;
     }
@@ -462,27 +478,21 @@ bool SpinSpinner::addSpinFeature()
         currentSpin.features.difficultExit = true;
         return true;
     }
-    else if(randomSelect==3) //biellmann after layback
-    {
-        int randomSegmentIndex = easyRandom::range(0,currentSpin.spinSegments.size()-1);
-        SpinSegment* randomSegment = &currentSpin.spinSegments.at(randomSegmentIndex);
-        if(randomSegment->features.biellmannAfterLayback)
-            return false;
-        randomSegment->features.biellmannAfterLayback = true;
-        return true;
-    }
     return false;
 }
 bool SpinSpinner::addPositionFeature()
 {
     SpinPosition* randomPosition = pickNonConflictingPosition();
     char randomFeature = randomPosition->pickRandomFeature();
+    if(randomFeature=='w' && !easyRandom::weightedTruth(WINDMILL_PROB))
+        return false;
     if(currentSpin.featureUsed(randomFeature))
         return false;
     if(!checkFeatureValidity(randomPosition,randomFeature))
         return false;
-    randomPosition->features.push_back(randomFeature);
-    return true;
+    if(randomPosition->addFeature(randomFeature,normalize))
+        return true;
+    return false;
 }
 bool SpinSpinner::addIntermediatePosition()
 {
@@ -491,7 +501,7 @@ bool SpinSpinner::addIntermediatePosition()
     int randomSegmentIndex = easyRandom::range(0,currentSpin.spinSegments.size()-1);
     SpinSegment* randomSegment = &currentSpin.spinSegments.at(randomSegmentIndex);
     int randomSpinPositionIndex = easyRandom::range(0,randomSegment->spinPositions.size()-1);
-    randomSegment->spinPositions.insert(randomSegment->spinPositions.begin()+randomSpinPositionIndex+1,SpinPosition('i'));
+    randomSegment->spinPositions.insert(randomSegment->spinPositions.begin()+randomSpinPositionIndex+1,SpinPosition(randomSegment,'i'));
     currentSpin.intermediatePositionFlag = true;
     return true;
 }
@@ -554,8 +564,6 @@ SpinPosition* SpinSpinner::pickNonConflictingPosition()
             int randomIndex = easyRandom::range(0,currentSpin.spinSegments.at(randomSegmentIndex).spinPositions.size()-1);
             return &currentSpin.spinSegments.at(randomSegmentIndex).spinPositions.at(randomIndex);
         }
-        else
-            throw; //when adding levels properly there should never be more than 2 bullets on each foot and 4 bullets total in change foot spins
     }
 }
 bool SpinSpinner::missingBulletForLevel4()
@@ -637,6 +645,8 @@ bool SpinSpinner::checkFeatureValidity(SpinPosition* spinPosition, char featureI
                 return false;
             if(featureInQuestion=='8') //8rev on base upright not counted as level
                 return false;
+            if(featureInQuestion=='b') //blade on base upright not counted as level
+                return false;
         }
         if(spinPosition->hasVariation('b') && featureInQuestion=='s') //speed on cross foot not counted as level
             return false;
@@ -645,11 +655,28 @@ bool SpinSpinner::checkFeatureValidity(SpinPosition* spinPosition, char featureI
     {
         if(spinPosition->variations.empty() && featureInQuestion=='8')
             return false;
+        if(spinPosition->parent->footness=='b' && featureInQuestion=='b') //backward outside to forward inside not allow for sit position (determined to be "too easy")
+            return false;
     }
-
     if(!easyRandom::weightedTruth(FEATURE_ON_SAME_POSITION_PROB) && !spinPosition->features.empty()) //reduce the chance of stacking features on the same position
         return false;
     return true;
+}
+bool SpinSpinner::shouldAvoidChangeFootByJump()
+{
+    if(!currentSpin.isChangeFoot) //safeguard
+        return true;
+    else if(normalize)
+    {
+        SpinSegment* firstSegment = &currentSpin.spinSegments.at(0);
+        SpinSegment* secondSegment = &currentSpin.spinSegments.at(1);
+        char lastPositionOnFirstSegment = firstSegment->spinPositions.at(firstSegment->spinPositions.size()-1).position;
+        if(firstSegment->direction!=secondSegment->direction) //no change of foot by jump if changing rotational direction
+            return true;
+        if((lastPositionOnFirstSegment!='s'||lastPositionOnFirstSegment!='u') && currentSpin.spinSegments.at(0).footness=='b') //no change of foot by jump from backspin to forward spin (unless sit or upright?)
+            return true;
+    }
+    return false;
 }
 std::string SpinSpinner::spinHistoryToCode()
 {

@@ -18,7 +18,7 @@ class Spin
         std::vector<SpinSegment> spinSegments; //maximum 2 (for change foot spins)
 
         //spin features
-        typedef struct SpinFeatures {
+        typedef struct {
             bool changeFootByJump = false;
             bool difficultEntrance = false;
             bool difficultExit = false;

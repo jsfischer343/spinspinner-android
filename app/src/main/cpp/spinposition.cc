@@ -1,8 +1,89 @@
 #include "spinposition.hh"
 
-SpinPosition::SpinPosition(char position)
+SpinPosition::SpinPosition(SpinSegment* parent, char position)
 {
+    this->parent = parent;
     this->position = position;
+}
+bool SpinPosition::addVariation(char variation, bool normalize)
+{
+    if(variations.empty()||!normalize)
+    {
+        variations.push_back(variation);
+        return true;
+    }
+    else //normalize the order of variations reduce spin awkwardness (this is subjective to some extent)
+    {
+        for(size_t i=0;i<variations.size();i++)
+        {
+            if(variations.at(i)=='u' && variation=='s') //side should come before up
+            {
+                variations.insert(variations.begin()+i,variation);
+                return true;
+            }
+            if(variations.at(i)=='s' && variation=='b') //behind should come after side
+            {
+                variations.insert(variations.begin()+i,variation);
+                return true;
+            }
+            if(variations.at(i)=='f' && variation=='t') //straight should come after front (only applies to upright)
+            {
+                variations.insert(variations.begin()+i,variation);
+                return true;
+            }
+            if(variations.at(i)=='m') //biellmann should always be last
+            {
+                variations.insert(variations.begin()+i,variation);
+                return true;
+            }
+            if((variations.at(i)=='s' && variation=='t')||variations.at(i)=='t' && variation=='s') //don't combine side and straight (only applies to upright)
+                return false;
+        }
+        variations.push_back(variation);
+        return true;
+    }
+}
+bool SpinPosition::addFeature(char feature, bool normalize)
+{
+    if(!normalize)
+    {
+        features.push_back(feature);
+        return true;
+    }
+    else
+    {
+        //features that shouldn't be in a given position type
+        if(position=='c'){}
+        else if(position=='s')
+        {
+            if(feature=='b')
+                return false;
+        }
+        else if(position=='u'){}
+        else if(position=='l')
+        {
+            if(feature=='b'||feature=='j')
+                return false;
+        }
+        else if(position=='i')
+        {
+            if(feature=='b'||feature=='j')
+                return false;
+        }
+        //features that shouldn't be combined together (subjective to some extent)
+        if(!features.empty())
+        {
+            for(size_t i=0;i<features.size();i++)
+            {
+                if((features.at(i)=='s' && feature=='j') || (features.at(i)=='j' && feature=='s'))
+                    return false;
+                if(features.at(i)=='w' || feature=='w') //windmill shouldn't be combined with any other features
+                    return false;
+            }
+        }
+        features.push_back(feature);
+        return true;
+    }
 }
 bool SpinPosition::hasVariation(char variation) const
 {
@@ -25,6 +106,8 @@ bool SpinPosition::hasFeature(char feature) const
 char SpinPosition::pickRandomFeature() const
 {
     std::vector<char> validFeatures = {'b','c','j','8','s'};
+    if(position=='c')
+        validFeatures.push_back('w');
     std::vector<char> usedFeatures = features;
     std::vector<char> unusedFeatures;
     std::sort(validFeatures.begin(),validFeatures.end());
@@ -38,23 +121,28 @@ char SpinPosition::pickRandomFeature() const
 char SpinPosition::pickRandomVariation() const
 {
     std::vector<char> validVariations;
-    //some variations may only be valid for some spins?
+    //for more details see "Singles Spin Difficult Variation Chart.pdf"
     if(position=='c')
     {
         validVariations = {'u','f','s'};
     }
     else if(position=='s')
     {
-        validVariations = {'u','f','b','s'};
+        validVariations = {'f','b','s'};
     }
     else if(position=='u')
     {
-        validVariations = {'u','f','b'}; //does a headless spin count as upright up?
+        validVariations = {'s','f','t','m'}; //does a headless spin count as upright up?
     }
     else if(position=='l')
     {
-        validVariations = {'s','b'}; //layback up?
+        validVariations = {'s','b','m'};
     }
+    else if(position=='i')
+    {
+        validVariations = {'u','f','b','s'};
+    }
+    else return 'e';
     return easyRandom::pickFromVector(validVariations);
 }
 std::string SpinPosition::toCode() const
@@ -70,7 +158,8 @@ std::string SpinPosition::prettyPrint() const
 {
     std::string resultString = "";
     resultString += getPositionString(false)+" ";
-    resultString += getVariationString(false);
+    if(variations.size()>0)
+        resultString += getVariationString(false)+" ";
     if(!this->features.empty())
         resultString += "("+getFeatureString(false)+")";
     return resultString;
@@ -117,10 +206,14 @@ std::string SpinPosition::getVariationString(bool codeFormat) const
                 variationString += "Up";
             else if(variations.at(i)=='s')
                 variationString += "Si";
+            else if(variations.at(i)=='t')
+                variationString += "St";
             else if(variations.at(i)=='f')
                 variationString += "Fr";
             else if(variations.at(i)=='b')
                 variationString += "Be";
+            else if(variations.at(i)=='m')
+                variationString += "Bi";
         }
     }
     else
@@ -131,12 +224,16 @@ std::string SpinPosition::getVariationString(bool codeFormat) const
                 variationString += "up";
             else if(variations.at(i)=='s')
                 variationString += "side";
+            else if(variations.at(i)=='t')
+                variationString += "straight";
             else if(variations.at(i)=='f')
                 variationString += "front";
             else if(variations.at(i)=='b')
                 variationString += "behind";
+            else if(variations.at(i)=='m')
+                variationString += "biellmann";
             if(i!=variations.size()-1)
-                variationString += " & ";
+                variationString += " -> ";
         }
     }
     return variationString;
@@ -158,6 +255,8 @@ std::string SpinPosition::getFeatureString(bool codeFormat) const
                 featureString += "8";
             else if(features.at(i)=='s')
                 featureString += "Sp";
+            else if(features.at(i)=='w')
+                featureString += "Wi";
         }
     }
     else
@@ -174,6 +273,8 @@ std::string SpinPosition::getFeatureString(bool codeFormat) const
                 featureString += "8revs";
             else if(features.at(i)=='s')
                 featureString += "speed";
+            else if(features.at(i)=='w')
+                featureString += "windmill";
             if(i!=features.size()-1)
                 featureString += ", ";
         }

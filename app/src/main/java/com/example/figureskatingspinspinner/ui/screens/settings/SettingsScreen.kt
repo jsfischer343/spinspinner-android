@@ -30,11 +30,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavHostController
 import com.example.figureskatingspinspinner.R
 import com.example.figureskatingspinspinner.navigateSingleTop
 import com.example.figureskatingspinspinner.ui.navigation.Destination
 import com.example.figureskatingspinspinner.ui.theme.getColorAppropriateResource
+import androidx.core.net.toUri
 
 
 @Composable
@@ -65,7 +67,7 @@ fun SettingsScreen(
                     text = "Github",
                     contentDescription = "Github",
                     onClick = {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/jsfischer343/skating-spin-spinner-android"))
+                        val intent = Intent(Intent.ACTION_VIEW,getString(context, R.string.github_repo).toUri())
                         context.startActivity(intent)
                     }
                 )

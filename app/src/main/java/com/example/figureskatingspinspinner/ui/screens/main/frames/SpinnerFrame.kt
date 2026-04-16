@@ -81,9 +81,7 @@ fun SpinnerFrame() {
         Row(
             modifier = Modifier.weight(1f).fillMaxWidth().wrapContentSize(Alignment.Center)
         ) {
-            //Text(modifier = Modifier.padding(12.dp), text = spinSpunText, style = MaterialTheme.typography.titleMedium)
             SpinSpunOutput(nativeSpinCode, DEBUG_MODE,spin)
-            //SampleSpunSpinOutput()
         }
         Row(
             modifier = Modifier.height(64.dp).fillMaxWidth(),
@@ -94,22 +92,18 @@ fun SpinnerFrame() {
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onSurface),
                 onClick = {
                 scope.launch {
-                    var spinLevel = spinOptionsDataStoreManager.get(SpinOptions.Dropdown.SpinLevel.label)
+                    var commandString: String = "-c"
+                    val spinLevel = spinOptionsDataStoreManager.get(SpinOptions.Dropdown.SpinLevel.label)
                     val spinType = spinOptionsDataStoreManager.get(SpinOptions.Dropdown.SpinType.label)?.lowercase()
                     val spinDirection = spinOptionsDataStoreManager.get(SpinOptions.Dropdown.SpinDirection.label)?.lowercase()
-                    if(spinLevel=="Any") spinLevel = "any"
-                    if(spinLevel=="Base") {
-                        spinLevel = "0"
-                    }
-                    if(spinDirection=="clockwise")
-                    {
-                        nativeSpinCode = NativeInterface.spinSpinnerCommand("-l $spinLevel -t $spinType -r -c")
-                    }
-                    else
-                    {
-                        nativeSpinCode = NativeInterface.spinSpinnerCommand("-l $spinLevel -t $spinType -c")
-                    }
-
+                    val normalize = spinOptionsDataStoreManager.get(SpinOptions.Toggle.Normalize.label)
+                    if(spinLevel=="Any") commandString += " -l any"
+                    else if(spinLevel=="Base") commandString += " -l 0"
+                    else commandString += " -l $spinLevel"
+                    if(spinDirection=="clockwise")  commandString += " -r"
+                    commandString += " -t $spinType"
+                    if(normalize=="true") commandString += " -b"
+                    nativeSpinCode = NativeInterface.spinSpinnerCommand(commandString)
                 }
             }
             ) {
@@ -233,23 +227,6 @@ fun SpinSegmentCard(
                     ) {
                         Text(text = "+")
                     }
-                }
-            }
-            if(spinSegment.biellmannAfterLayback) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Text(text = "+")
-                }
-                //position
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Text(text = "Biellmann")
                 }
             }
         }

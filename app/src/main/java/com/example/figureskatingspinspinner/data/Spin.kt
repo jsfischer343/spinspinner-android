@@ -113,7 +113,6 @@ class SpinSegment(segmentCode: String, direction: Char) {
     var direction: Char = direction
     var footness: Char = 'e'
     var spinPositions: MutableList<SpinPosition> = mutableListOf()
-    var biellmannAfterLayback: Boolean = false
 
     init {
         var segmentCode = segmentCode
@@ -135,12 +134,6 @@ class SpinSegment(segmentCode: String, direction: Char) {
             }
         }
         for(i in 0 until tokens.size) {
-            var tempIndex = tokens[i].indexOf("Bi")
-            if(tempIndex!=-1) {
-                biellmannAfterLayback = true
-                tokens[i] = tokens[i].removeRange(tempIndex,tempIndex+2)
-            }
-
             if(tokens[i]!="+") spinPositions.add(SpinPosition(tokens[i]))
         }
     }
@@ -183,9 +176,19 @@ class SpinPosition(positionCode: String) {
                 variations.add('b'); positionCode =
                     positionCode.removeRange(tempIndex, tempIndex + 2)
             }
+            tempIndex = positionCode.indexOf("Bi")
+            if (tempIndex != -1) {
+                variations.add('m'); positionCode =
+                    positionCode.removeRange(tempIndex, tempIndex + 2)
+            }
             tempIndex = positionCode.indexOf("Si")
             if (tempIndex != -1) {
                 variations.add('s'); positionCode =
+                    positionCode.removeRange(tempIndex, tempIndex + 2)
+            }
+            tempIndex = positionCode.indexOf("St")
+            if (tempIndex != -1) {
+                variations.add('t'); positionCode =
                     positionCode.removeRange(tempIndex, tempIndex + 2)
             }
             tempIndex = positionCode.indexOf("Up")
@@ -223,6 +226,9 @@ class SpinPosition(positionCode: String) {
             if (tokens[i] == "Sp") {
                 features.add('s')
             }
+            if (tokens[i] == "Wi") {
+                features.add('w')
+            }
         }
     }
 
@@ -252,6 +258,8 @@ class SpinPosition(positionCode: String) {
                 's' -> "Side"
                 'f' -> "Front"
                 'b' -> "Behind"
+                't' -> "Straight"
+                'm' -> "Biellmann"
                 else -> "error"
             }
             if(i<variations.size-1) returnString += " -> "
@@ -268,6 +276,7 @@ class SpinPosition(positionCode: String) {
                 'j' -> "Jump"
                 '8' -> "8 Revs"
                 's' -> "Speed"
+                'w' -> "Windmill"
                 else -> "error"
             }
             if(i<features.size-1) returnString += ", "

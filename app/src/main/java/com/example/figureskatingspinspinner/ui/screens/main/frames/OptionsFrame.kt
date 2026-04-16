@@ -23,6 +23,7 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -50,6 +51,9 @@ fun OptionsFrame() {
     ) {
         SpinOptions.Dropdown.allDropdownsList.forEach {
             OptionsFrame_DropdownCard(it)
+        }
+        SpinOptions.Toggle.allTogglesList.forEach {
+            OptionsFrame_ToggleCard(it)
         }
     }
 }
@@ -142,4 +146,70 @@ fun OptionsFrame_DropdownCard_Menu(
             )
         }
     }
+}
+
+@Composable
+fun OptionsFrame_ToggleCard(
+    toggle: SpinOptions.Toggle
+) {
+    val localContext = LocalContext.current
+    val spinOptionsDataStoreManager = DataStoreManager(localContext.spinOptionsDataStore)
+    val scope = rememberCoroutineScope()
+    val toggleState by spinOptionsDataStoreManager.getFlowObj(toggle.label).collectAsState(initial = "true")
+    val toggleStateBool: Boolean
+    if(toggleState=="true") toggleStateBool = true
+    else toggleStateBool = false
+
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth().height(64.dp).clickable {
+            scope.launch {
+                var nextState: String
+                if(toggleState=="true") nextState = "false"
+                else nextState = "true"
+                spinOptionsDataStoreManager.save(toggle.label,nextState)
+            }
+        }
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Box(
+                modifier = Modifier.weight(3f).padding(start = 8.dp).fillMaxHeight()
+            ) {
+                Column(
+                    modifier = Modifier.padding(4.dp).fillMaxSize()
+                        .wrapContentHeight(Alignment.CenterVertically)
+                ) {
+                    Text(
+                        modifier = Modifier.padding(start = 8.dp),
+                        text = toggle.label,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+            Box(
+                modifier = Modifier.weight(1f).padding(end = 8.dp).wrapContentWidth(Alignment.End)
+                    .fillMaxHeight()
+            ) {
+                Switch(
+                    modifier = Modifier.fillMaxSize().wrapContentWidth(Alignment.End),
+                    checked = toggleStateBool,
+                    onCheckedChange = {
+                        scope.launch {
+                            var nextState: String
+                            if(toggleState=="true") nextState = "false"
+                            else nextState = "true"
+                            spinOptionsDataStoreManager.save(toggle.label,nextState)
+                        }
+                    }
+                )
+            }
+        }
+    }
+    Spacer(
+        modifier = Modifier.padding(2.dp)
+    )
 }

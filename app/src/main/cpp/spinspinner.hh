@@ -30,6 +30,9 @@
 #define FEATURE_ON_SAME_POSITION_PROB 0.05
 #define VARIATION_ON_SAME_POSITION_PROB 0.8
 
+//Misc probabilities
+#define WINDMILL_PROB 0.3
+
 #include <algorithm>
 #include <string>
 #include <vector>
@@ -40,9 +43,10 @@ class SpinSpinner
 {
     public:
         bool defaultDirection = false; //false: counter-clockwise, true: clockwise
+        bool normalize = true;
         std::vector<Spin> spinHistory = {}; //every time one of the spin functions is called it will push to this list
 
-        SpinSpinner(bool defaultDirection);
+        SpinSpinner(bool defaultDirection, bool normalize);
 
         void spin(); //as in the act of spinning a wheel
         void spin(int level);
@@ -70,6 +74,7 @@ class SpinSpinner
             bool missingBulletForLevel4();
             void addARequiredBulletForLevel4();
             bool checkFeatureValidity(SpinPosition* spinPosition, char featureInQuestion);
+            bool shouldAvoidChangeFootByJump();
 
 
     public:

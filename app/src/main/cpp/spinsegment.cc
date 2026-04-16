@@ -8,15 +8,6 @@ SpinSegment::SpinSegment(bool defaultDirection, char footness)
     else
         this->direction = 'r';
 }
-SpinSegment::SpinSegment(bool defaultDirection, char footness, std::vector<SpinPosition> spinPositions)
-{
-    this->footness = footness;
-    this->spinPositions = spinPositions;
-    if(defaultDirection)
-        this->direction = 'l';
-    else
-        this->direction = 'r';
-}
 void SpinSegment::swapDirection()
 {
     if(direction=='r')
@@ -53,8 +44,6 @@ int SpinSegment::getBullets() const
 
     //count segement specific features
     if(features.difficultChangeOfPosition)
-        sumOfBullets++;
-    if(features.biellmannAfterLayback)
         sumOfBullets++;
 
     return sumOfBullets;
@@ -113,8 +102,6 @@ std::string SpinSegment::toCode() const
         if(i!=spinPositions.size()-1)
             resultString += "+";
     }
-    if(this->features.biellmannAfterLayback)
-        resultString += "Bi";
     resultString += "]";
 
     return resultString;
@@ -141,8 +128,6 @@ std::string SpinSegment::prettyPrint() const
         if(i!=spinPositions.size()-1)
             resultString += " + ";
     }
-    if(this->features.biellmannAfterLayback)
-        resultString += " -> biellmann";
     resultString += " ]";
 
     return resultString;

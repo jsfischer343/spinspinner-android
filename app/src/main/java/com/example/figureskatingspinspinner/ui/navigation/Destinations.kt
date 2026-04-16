@@ -86,7 +86,7 @@ sealed class Destination    //Sealed to protect against extension by other class
          override val contentDescription = "App Guide Screen"
          override val content: @Composable (navController: NavHostController) -> Unit = { navController ->
              val filePath = getColorAppropriateHTMLFile("file:///android_asset/html/appguide.html","file:///android_asset/html/appguide_dark.html")
-             HTMLViewScreen(navController,this,"GLP v3 Licence", filePath)
+             HTMLViewScreen(navController,this,this.label, filePath)
          }
      }
      object Licence : Destination() {
@@ -96,7 +96,7 @@ sealed class Destination    //Sealed to protect against extension by other class
          override val contentDescription = "Licence Screen"
          override val content: @Composable (navController: NavHostController) -> Unit = { navController ->
              val filePath = getColorAppropriateHTMLFile("file:///android_asset/html/license.html","file:///android_asset/html/license_dark.html")
-             HTMLViewScreen(navController,this,"GLP v3 Licence", filePath)
+             HTMLViewScreen(navController,this,this.label, filePath)
          }
      }
      object Settings : Destination() {

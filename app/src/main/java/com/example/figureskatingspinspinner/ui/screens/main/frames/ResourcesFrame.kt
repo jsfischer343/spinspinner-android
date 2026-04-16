@@ -59,10 +59,18 @@ fun ResourcesFrame(
             onClick = { navController.navigateSingleTop(Destination.AppGuide.route) }
         )
         ResourcesNavigationRow(
-            text = "25-26 ISU Communication",
-            contentDescription = "25-26 ISU Communication",
+            text = "2025-26 Levels of Difficulty Singles",
+            contentDescription = "2025-26 Levels of Difficulty Singles",
             onClick = {
                 val fileUri = getPdfUriFromAssets(context, "pdfs/2025-26 Levels Of Difficulty Singles.pdf")
+                openPDF(context, fileUri)
+            }
+        )
+        ResourcesNavigationRow(
+            text = "Spin Difficult Variation Chart",
+            contentDescription = "Spin Difficult Variation Chart",
+            onClick = {
+                val fileUri = getPdfUriFromAssets(context, "pdfs/Singles Spin Difficult Variation Chart.pdf")
                 openPDF(context, fileUri)
             }
         )

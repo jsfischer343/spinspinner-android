@@ -19,16 +19,14 @@ class SpinSegment
         std::vector<SpinPosition> spinPositions = {};
 
         //segment specific features
-        typedef struct SpinSegmentFeatures {
+        typedef struct SpinSegmentFeatures{
             bool difficultChangeOfPosition = false; //sit or upright to camel spin
-            bool biellmannAfterLayback = false;
         } SpinSegmentFeatures;
         SpinSegmentFeatures features;
 
 
         //functions
         SpinSegment(bool defaultDirection, char footness);
-        SpinSegment(bool defaultDirection, char footness, std::vector<SpinPosition> spinPositions);
 
         void swapDirection();
         void swapFootness();
