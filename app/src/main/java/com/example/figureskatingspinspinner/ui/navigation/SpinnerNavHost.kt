@@ -32,6 +32,9 @@ fun SpinnerNavHost(
         composable(route = Destination.AppGuide.route) {
             Destination.AppGuide.content(navController)
         }
+        composable(route = Destination.About.route) {
+            Destination.About.content(navController)
+        }
         composable(route = Destination.Licence.route) {
             Destination.Licence.content(navController)
         }

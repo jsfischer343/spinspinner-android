@@ -59,15 +59,31 @@ fun SettingsScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 SettingsNavigationRow(
-                    text = Destination.AppGuide.label,
-                    contentDescription = Destination.AppGuide.contentDescription,
-                    onClick = { navController.navigateSingleTop(Destination.AppGuide.route) }
+                    text = Destination.About.label,
+                    contentDescription = Destination.About.contentDescription,
+                    onClick = { navController.navigateSingleTop(Destination.About.route) }
                 )
                 SettingsNavigationRow(
                     text = "Github",
                     contentDescription = "Github",
                     onClick = {
-                        val intent = Intent(Intent.ACTION_VIEW,getString(context, R.string.github_repo).toUri())
+                        val intent = Intent(Intent.ACTION_VIEW,getString(context, R.string.uri_github_repo).toUri())
+                        context.startActivity(intent)
+                    }
+                )
+                SettingsNavigationRow(
+                    text = "Report Bug or Issue",
+                    contentDescription = "Report Bug or Issue",
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW,getString(context, R.string.uri_reportbug).toUri())
+                        context.startActivity(intent)
+                    }
+                )
+                SettingsNavigationRow(
+                    text = "Beta Survey",
+                    contentDescription = "Beta Survey",
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW,getString(context, R.string.uri_betasurvey).toUri())
                         context.startActivity(intent)
                     }
                 )

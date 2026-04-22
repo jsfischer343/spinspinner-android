@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">SpinSpinner</string>
     <string name="app_version">1.0</string>
-    <string name="github_repo">https://github.com/jsfischer343/skating-spin-spinner-android</string>
+    <string name="uri_github_repo">https://github.com/jsfischer343/skating-spin-spinner-android</string>
+    <string name="uri_reportbug">https://tally.so/r/VL1N6v</string>
+    <string name="uri_betasurvey">https://tally.so/r/2ExpKe</string>
 </resources>
