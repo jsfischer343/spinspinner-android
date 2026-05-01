@@ -26,9 +26,9 @@ fun SpinnerNavHost(
                 destination.content(navController)
             }
         }
-        composable(route = Destination.SpinHistory.route) {
-            Destination.SpinHistory.content(navController)
-        }
+//        composable(route = Destination.SpinHistory.route) {
+//            Destination.SpinHistory.content(navController)
+//        }
         composable(route = Destination.AppGuide.route) {
             Destination.AppGuide.content(navController)
         }
@@ -73,4 +73,8 @@ fun NavHostController.navigateSingleTopAndClearNavStack(route: String) {
             popExit = 0
         }
     }
+}
+
+fun NavHostController.popBackStackSafe() {
+    if(!this.popBackStack()) this.navigateSingleTop(Destination.Main.Spinner.route)
 }

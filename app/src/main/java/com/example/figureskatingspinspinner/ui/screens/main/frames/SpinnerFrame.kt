@@ -50,7 +50,7 @@ import com.example.figureskatingspinspinner.data.spinOptionsDataStore
 import com.example.figureskatingspinspinner.ui.theme.getColorAppropriateResource
 import kotlinx.coroutines.launch
 
-const val DEBUG_MODE = true
+const val DEBUG_MODE = false
 @Composable
 fun SpinnerFrame() {
     val localContext = LocalContext.current

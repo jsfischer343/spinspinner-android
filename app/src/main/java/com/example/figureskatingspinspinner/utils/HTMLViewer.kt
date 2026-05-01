@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavHostController
+import com.example.figureskatingspinspinner.popBackStackSafe
 import com.example.figureskatingspinspinner.ui.navigation.Destination
 
 @Composable
@@ -64,7 +65,7 @@ fun HTMLViewScreen_TopBar(
         ) },
         navigationIcon = {
             IconButton(
-                onClick = { navController.popBackStack() }
+                onClick = { navController.popBackStackSafe() }
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,

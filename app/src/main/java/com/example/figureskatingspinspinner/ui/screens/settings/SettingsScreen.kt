@@ -37,6 +37,7 @@ import com.example.figureskatingspinspinner.navigateSingleTop
 import com.example.figureskatingspinspinner.ui.navigation.Destination
 import com.example.figureskatingspinspinner.ui.theme.getColorAppropriateResource
 import androidx.core.net.toUri
+import com.example.figureskatingspinspinner.popBackStackSafe
 
 
 @Composable
@@ -147,7 +148,7 @@ fun SettingsScreen_TopBar(
         ) },
         navigationIcon = {
             IconButton(
-                onClick = { navController.popBackStack() }
+                onClick = { navController.popBackStackSafe() }
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,

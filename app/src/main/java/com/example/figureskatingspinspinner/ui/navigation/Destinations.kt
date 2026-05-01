@@ -14,7 +14,7 @@ import com.example.figureskatingspinspinner.ui.screens.main.frames.OptionsFrame
 import com.example.figureskatingspinspinner.ui.screens.main.frames.ResourcesFrame
 import com.example.figureskatingspinspinner.ui.screens.main.frames.SpinnerFrame
 import com.example.figureskatingspinspinner.ui.screens.settings.SettingsScreen
-import com.example.figureskatingspinspinner.ui.screens.spinhistory.SpinHistoryScreen
+//import com.example.figureskatingspinspinner.ui.screens.spinhistory.SpinHistoryScreen
 import com.example.figureskatingspinspinner.ui.theme.getColorAppropriateHTMLFile
 import com.example.figureskatingspinspinner.utils.HTMLViewScreen
 
@@ -68,17 +68,17 @@ sealed class Destination    //Sealed to protect against extension by other class
             val allDestinationsList: List<Main> get() = Initializer.allDestinationsList
         }
     }
-     object SpinHistory : Destination () {
-         override val route = "spinhistory"
-         override val label = "Spin History"
-         override val icon = Icons.Default.Info
-         val resIcon_light: Int = R.drawable.history_24dp_000000_fill0_wght400_grad0_opsz24
-         val resIcon_dark: Int = R.drawable.history_24dp_ffffff_fill0_wght400_grad0_opsz24
-         override val contentDescription = "Spin History Screen"
-         override val content: @Composable (navController: NavHostController) -> Unit = { navController ->
-             SpinHistoryScreen(navController, this)
-         }
-     }
+//     object SpinHistory : Destination () {
+//         override val route = "spinhistory"
+//         override val label = "Spin History"
+//         override val icon = Icons.Default.Info
+//         val resIcon_light: Int = R.drawable.history_24dp_000000_fill0_wght400_grad0_opsz24
+//         val resIcon_dark: Int = R.drawable.history_24dp_ffffff_fill0_wght400_grad0_opsz24
+//         override val contentDescription = "Spin History Screen"
+//         override val content: @Composable (navController: NavHostController) -> Unit = { navController ->
+//             SpinHistoryScreen(navController, this)
+//         }
+//     }
      object AppGuide : Destination() {
          override val route = "appguide"
          override val label = "SpinSpinner Guide"
