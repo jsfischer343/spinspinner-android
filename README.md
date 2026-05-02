@@ -1,3 +1,8 @@
+<div align="center">
+  <h1>SpinSpinner</h1>
+  <img src="https://github.com/jsfischer343/spinspinner-android/blob/master/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" alt="SpinSpinner.icon"/>
+</div>
+
 ## About
 SpinSpinner is a simple app that "spins" random figure skating spins that follow ISU (international skating union) rules.
 It is intended to assist skaters in coming up with spins for their programs by generating spins that adhere to the required guidelines for acquiring spin levels.
@@ -6,8 +11,18 @@ It is intended to assist skaters in coming up with spins for their programs by g
 
 ### App Store
 TBD
+### Download ([only available until September](https://keepandroidopen.org/))
+- Download the apk from [releases](https://github.com/jsfischer343/spinspinner-android/releases) directly to phone
+- Navigate to the downloads folder and click on the apk
+- Follow the prompts to allow for install
+
+Note, Android will warn you about installing apks from unknown sources.
 ### ADB/Streamed Install
-To install, download the apk from [releases](https://github.com/jsfischer343/spinspinner-android/releases) or compile from source using [AndroidStudio](https://developer.android.com/studio). Then use [ADB Tools](https://developer.android.com/tools/releases/platform-tools) ```adb install path_to_apk/spinspinner.apk``` after connecting to the device using USB or wireless debugging.
+- First enable developer settings on the device (see steps on android.com)
+- Download the apk from [releases](https://github.com/jsfischer343/spinspinner-android/releases) onto laptop or computer, or compile from source using [AndroidStudio](https://developer.android.com/studio)
+- Download the [ADB Tool](https://developer.android.com/tools/releases/platform-tools)
+- Enable USB or wireless debugging in developer settings and connect device to laptop or computer
+- Run ```adb install <path_to_apk>```
 
 ## Guide
 
@@ -18,7 +33,7 @@ To install, download the apk from [releases](https://github.com/jsfischer343/spi
 * Segment: A series of positions all on the same foot. Change foot spins will have two segments, all other spins will only have one.
 * (Difficult) Variation: A change of core or body position inside of a spin position that changes the quality of the spin in a significant way.
 * Feature: A special modification to the nature of a spin that makes it more difficult. In some contexts a difficult variation is also considered a feature.
-### Spinner UI Layout
+### Spin Layout
 Spins are broken down into segments: entrance, first segment, second segment (change foot only), and exit.
 * Entrance: This card will specify if the spin has a fly or a difficult entrance otherwise it is omitted.
 * Segment(s): Contains the actual spinning portions of the spin. Every segment will have a direction specified by a rotation symbol in the top left and the "footness" at the top of the card. Then each position will appear in descending rows separated by a "+". Qualities of each position will be mentioned after the position. First, variations separated by "->", then features contained in parenthesis.
