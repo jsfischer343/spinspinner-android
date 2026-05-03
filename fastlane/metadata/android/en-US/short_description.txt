@@ -1,0 +1,1 @@
+Figure-Skating spin generator for ISU and US Figure Skating compliant spins

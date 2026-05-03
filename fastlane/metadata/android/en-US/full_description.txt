@@ -1,0 +1,1 @@
+SpinSpinner is a simple app that generates random figure skating spins that follow the ISU (international skating union) rules. It is intended to assist skaters in coming up with leveled spins for their programs by only generating ones that adhere to the required guidelines for acquiring spin levels.
