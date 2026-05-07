@@ -1,10 +1,6 @@
 *.iml
 .idea
 .gradle
-gradle/wrapper/gradle-wrapper.jar
-gradle/gradle-daemon-jvm.properties
-gradlew
-gradlew.bat
 /local.properties
 /.idea/caches
 /.idea/libraries
