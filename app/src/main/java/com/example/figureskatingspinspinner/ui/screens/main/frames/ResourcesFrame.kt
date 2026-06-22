@@ -62,7 +62,7 @@ fun ResourcesFrame(
             text = "Levels of Difficulty",
             contentDescription = "Levels of Difficulty",
             onClick = {
-                val fileUri = getPdfUriFromAssets(context, "pdfs/2025-26 Levels Of Difficulty Singles.pdf")
+                val fileUri = getPdfUriFromAssets(context, "pdfs/levels_of_difficulty.pdf")
                 openPDF(context, fileUri)
             }
         )
@@ -70,7 +70,7 @@ fun ResourcesFrame(
             text = "Difficult Variation Chart",
             contentDescription = "Difficult Variation Chart",
             onClick = {
-                val fileUri = getPdfUriFromAssets(context, "pdfs/Singles Spin Difficult Variation Chart.pdf")
+                val fileUri = getPdfUriFromAssets(context, "pdfs/spin_difficult_variation_chart.pdf")
                 openPDF(context, fileUri)
             }
         )
