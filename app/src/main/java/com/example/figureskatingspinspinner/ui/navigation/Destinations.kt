@@ -81,9 +81,9 @@ sealed class Destination    //Sealed to protect against extension by other class
 //     }
      object AppGuide : Destination() {
          override val route = "appguide"
-         override val label = "SpinSpinner Guide"
+         override val label = "Guide"
          override val icon = Icons.Filled.Info
-         override val contentDescription = "App Guide Screen"
+         override val contentDescription = "App Guide"
          override val content: @Composable (navController: NavHostController) -> Unit = { navController ->
              val filePath = getColorAppropriateHTMLFile("file:///android_asset/html/appguide.html","file:///android_asset/html/appguide_dark.html")
              HTMLViewScreen(navController,this,this.label, filePath)
