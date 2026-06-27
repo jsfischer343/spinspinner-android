@@ -5,6 +5,7 @@ bool Spin::hasAllPrimaryPositions() const
     bool hasCamel = false;
     bool hasSit = false;
     bool hasUpright = false;
+    bool hasLayback = false;
     for(size_t i=0;i<spinSegments.size();i++)
     {
         for(size_t j=0;j<spinSegments.at(i).spinPositions.size();j++)
@@ -15,9 +16,11 @@ bool Spin::hasAllPrimaryPositions() const
                 hasSit = true;
             else if(spinSegments.at(i).spinPositions.at(j).position=='u')
                 hasUpright = true;
+            else if(spinSegments.at(i).spinPositions.at(j).position=='l')
+                hasLayback = true;
         }
     }
-    if(hasCamel && hasSit && hasUpright)
+    if(hasCamel && hasSit && (hasUpright||hasLayback))
         return true;
     return false;
 }
@@ -88,37 +91,56 @@ std::string Spin::toCode() const
     std::string resultString = "";
     //level
     resultString += "L"+std::to_string(this->level)+":";
-
-    //flying modifier
-    if(this->isFlying)
-        resultString += "F";
-
-    //first segment
-    resultString += this->spinSegments.at(0).toCode();
-
-    if(this->spinSegments.size()>1)
+    if(this->baseType=='2')
     {
-        //transition
-        if(this->features.changeFootByJump)
-            resultString += "-j-";
+        if(this->spinSegments.at(0).direction=='r')
+            resultString+="cc";
         else
-            resultString += "+";
+            resultString+="c";
+        resultString+="[2FtUSp]";
+    }
+    else
+    {
+        //flying modifier
+        if(this->isFlying)
+            resultString += "F";
 
-        //second segment
-        resultString += this->spinSegments.at(1).toCode();
+        //first segment
+        resultString += this->spinSegments.at(0).toCode();
 
-        //any remaining segments?
-        for(size_t i=2;i<spinSegments.size();i++)
+        if(this->spinSegments.size()>1)
         {
-            resultString += this->spinSegments.at(i).toCode();
+            //transition
+            if(this->features.changeFootByJump)
+                resultString += "-j-";
+            else
+                resultString += "+";
+
+            //second segment
+            resultString += this->spinSegments.at(1).toCode();
+
+            //any remaining segments?
+            for(size_t i=2;i<spinSegments.size();i++)
+            {
+                resultString += this->spinSegments.at(i).toCode();
+            }
+        }
+
+        //final modifiers
+        if(this->features.difficultEntrance)
+            resultString += "DE";
+        if(this->features.difficultExit)
+            resultString += "DX";
+
+        //adult specific features
+        if(this->features.cleanChangeFootSpin||this->features.allThreeBasicPositionsAnywhere)
+            resultString += "CBP";
+        else if(this->isChangeFoot)
+        {
+            if(this->spinSegments.at(1).features.allThreeBasicPositionsOnSecondFoot)
+                resultString += "CBP2F";
         }
     }
-
-    //final modifiers
-    if(this->features.difficultEntrance)
-        resultString += "DE";
-    if(this->features.difficultExit)
-        resultString += "DX";
 
     return resultString;
 }
@@ -127,41 +149,60 @@ std::string Spin::prettyPrint() const
     std::string resultString = "";
     //level
     resultString += "Level "+std::to_string(this->level)+": ";
-
-    //flying modifier
-    if(this->isFlying)
-        resultString += "flying ";
-
-    //first segment
-    resultString += this->spinSegments.at(0).prettyPrint();
-
-    if(this->spinSegments.size()>1)
+    if(this->baseType=='2')
     {
-        //transition
-        if(this->features.changeFootByJump)
-            resultString += " --jump-- ";
+        if(this->spinSegments.at(0).direction=='r')
+            resultString+="(ccw)";
         else
-            resultString += " + ";
-
-        //second segment
-        resultString += this->spinSegments.at(1).prettyPrint();
-
-        //any remaining segments?
-        for(size_t i=2;i<spinSegments.size();i++)
-        {
-            resultString += this->spinSegments.at(i).prettyPrint();
-        }
+            resultString+="(cc)";
+        resultString+="[ 2 foot upright ]";
     }
-
-    //final modifiers
-    if(this->features.difficultEntrance && this->features.difficultExit)
-        resultString += " with difficult entrance & exit";
     else
     {
-        if(this->features.difficultEntrance)
-            resultString += " with difficult entrance";
-        if(this->features.difficultExit)
-            resultString += " with difficult exit";
+        //flying modifier
+        if(this->isFlying)
+            resultString += "flying ";
+
+        //first segment
+        resultString += this->spinSegments.at(0).prettyPrint();
+
+        if(this->spinSegments.size()>1)
+        {
+            //transition
+            if(this->features.changeFootByJump)
+                resultString += " --jump-- ";
+            else
+                resultString += " + ";
+
+            //second segment
+            resultString += this->spinSegments.at(1).prettyPrint();
+
+            //any remaining segments?
+            for(size_t i=2;i<spinSegments.size();i++)
+            {
+                resultString += this->spinSegments.at(i).prettyPrint();
+            }
+        }
+
+        //final modifiers
+        if(this->features.difficultEntrance && this->features.difficultExit)
+            resultString += " with difficult entrance & exit";
+        else
+        {
+            if(this->features.difficultEntrance)
+                resultString += " with difficult entrance";
+            if(this->features.difficultExit)
+                resultString += " with difficult exit";
+        }
+
+        //adult specific features
+        if(this->features.cleanChangeFootSpin||this->features.allThreeBasicPositionsAnywhere)
+            resultString += " with clean basic positions";
+        else if(this->isChangeFoot)
+        {
+            if(this->spinSegments.at(1).features.allThreeBasicPositionsOnSecondFoot)
+                resultString += " with clean basic positions all on second foot";
+        }
     }
 
     return resultString;

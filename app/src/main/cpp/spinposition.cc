@@ -36,7 +36,7 @@ bool SpinPosition::addVariation(char variation, bool normalize)
                 variations.insert(variations.begin()+i,variation);
                 return true;
             }
-            if((variations.at(i)=='s' && variation=='t')||variations.at(i)=='t' && variation=='s') //don't combine side and straight (only applies to upright)
+            if((variations.at(i)=='s' && variation=='t')||(variations.at(i)=='t' && variation=='s')) //don't combine side and straight (only applies to upright)
                 return false;
         }
         variations.push_back(variation);
@@ -103,9 +103,25 @@ bool SpinPosition::hasFeature(char feature) const
     }
     return false;
 }
-char SpinPosition::pickRandomFeature() const
+bool SpinPosition::hasAnyVariation() const
 {
-    std::vector<char> validFeatures = {'b','c','j','8','s'};
+    if(variations.size()>0)
+        return true;
+    return false;
+}
+bool SpinPosition::hasAnyFeature() const
+{
+    if(features.size()>0)
+        return true;
+    return false;
+}
+char SpinPosition::pickRandomFeature(bool isRev5) const
+{
+    std::vector<char> validFeatures;
+    if(isRev5)
+        validFeatures = {'b','c','j','5','s'};
+    else
+        validFeatures = {'b','c','j','8','s'};
     if(position=='c')
         validFeatures.push_back('w');
     std::vector<char> usedFeatures = features;
@@ -113,10 +129,26 @@ char SpinPosition::pickRandomFeature() const
     std::sort(validFeatures.begin(),validFeatures.end());
     std::sort(usedFeatures.begin(),usedFeatures.end());
     std::set_difference(validFeatures.begin(),validFeatures.end(),usedFeatures.begin(),usedFeatures.end(),std::back_inserter(unusedFeatures));
+
+    std::vector<double> selectionWeights;
+    for(int i=0;i<unusedFeatures.size();i++)
+    {
+        if(unusedFeatures.at(i)=='b')
+            selectionWeights.push_back(POS_FEATURE_BLADE_PROB);
+        else if(unusedFeatures.at(i)=='c')
+            selectionWeights.push_back(POS_FEATURE_COE_PROB);
+        else if(unusedFeatures.at(i)=='j')
+            selectionWeights.push_back(POS_FEATURE_JUMP_PROB);
+        else if(unusedFeatures.at(i)=='5'||unusedFeatures.at(i)=='8')
+            selectionWeights.push_back(POS_FEATURE_REV_PROB);
+        else if(unusedFeatures.at(i)=='s')
+            selectionWeights.push_back(POS_FEATURE_SPEED_PROB);
+    }
+
     if(unusedFeatures.empty())
         return -1;
     else
-        return easyRandom::pickFromVector(unusedFeatures);
+        return easyRandom::pickFromVectorWeighted(unusedFeatures,selectionWeights);
 }
 char SpinPosition::pickRandomVariation() const
 {
@@ -132,7 +164,10 @@ char SpinPosition::pickRandomVariation() const
     }
     else if(position=='u')
     {
-        validVariations = {'s','f','t','m'}; //does a headless spin count as upright up?
+        if(this->hasVariation('s')||this->hasVariation('t')) //note: straight and sideways count as the same DV in upright spins
+            validVariations = {'f','m'};
+        else
+            validVariations = {'s','f','t','m'};
     }
     else if(position=='l')
     {
@@ -142,7 +177,8 @@ char SpinPosition::pickRandomVariation() const
     {
         validVariations = {'u','f','b','s'};
     }
-    else return 'e';
+    else
+        throw;
     return easyRandom::pickFromVector(validVariations);
 }
 std::string SpinPosition::toCode() const
@@ -257,6 +293,8 @@ std::string SpinPosition::getFeatureString(bool codeFormat) const
                 featureString += "Sp";
             else if(features.at(i)=='w')
                 featureString += "Wi";
+            else if(features.at(i)=='5')
+                featureString += "5";
         }
     }
     else
@@ -275,6 +313,8 @@ std::string SpinPosition::getFeatureString(bool codeFormat) const
                 featureString += "speed";
             else if(features.at(i)=='w')
                 featureString += "windmill";
+            else if(features.at(i)=='5')
+                featureString += "5 revs";
             if(i!=features.size()-1)
                 featureString += ", ";
         }

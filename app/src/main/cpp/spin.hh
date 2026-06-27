@@ -11,17 +11,20 @@ class Spin
 {
     public:
         //base spin qualities
-        char baseType; //camel -> 'c'; sit -> 's'; upright -> 'u'; layback -> 'l'; combo -> 'k'
+        char baseType; //camel -> 'c'; sit -> 's'; upright -> 'u'; layback -> 'l'; combo -> 'k'; 2ft -> '2'
         bool isFlying;
         bool isChangeFoot;
         int level = 0;
         std::vector<SpinSegment> spinSegments; //maximum 2 (for change foot spins)
 
         //spin features
-        typedef struct {
+        typedef struct SpinFeatures {
             bool changeFootByJump = false;
             bool difficultEntrance = false;
             bool difficultExit = false;
+            //adult specific:
+            bool cleanChangeFootSpin = false; //awarded to second foot, (F)CCSp and (F)CSSp only
+            bool allThreeBasicPositionsAnywhere = false; //adult silver & bronze only, for (F)CoSp and (F)CCoSp only
         } SpinFeatures;
         SpinFeatures features;
 

@@ -31,11 +31,11 @@ std::vector<char> SpinSegment::getUsedPositions() const
     }
     return usedPositions;
 }
-int SpinSegment::getBullets() const
+int SpinSegment::getBulletCount() const
 {
     int sumOfBullets = 0;
 
-    //count features and variations on spin positions
+    //count features and variations on all spin positions
     for(size_t i=0;i<spinPositions.size();i++)
     {
         sumOfBullets += spinPositions.at(i).variations.size();
@@ -45,8 +45,22 @@ int SpinSegment::getBullets() const
     //count segement specific features
     if(features.difficultChangeOfPosition)
         sumOfBullets++;
+    if(features.allThreeBasicPositionsOnSecondFoot)
+        sumOfBullets++;
 
     return sumOfBullets;
+}
+int SpinSegment::getVariationCount() const
+{
+    int sumOfVariations = 0;
+
+    //count variations on all spin positions
+    for(size_t i=0;i<spinPositions.size();i++)
+    {
+        sumOfVariations += spinPositions.at(i).variations.size();
+    }
+
+    return sumOfVariations;
 }
 bool SpinSegment::hasDifficultChangeOfPosition() const
 {
@@ -54,7 +68,7 @@ bool SpinSegment::hasDifficultChangeOfPosition() const
     {
         char previousPosition = this->spinPositions.at(i-1).position;
         char currentPosition = this->spinPositions.at(i).position;
-        if(previousPosition=='s'||previousPosition=='u')
+        if(previousPosition=='s'||previousPosition=='u'||previousPosition=='l')
         {
             if(currentPosition=='c')
             {
@@ -62,6 +76,27 @@ bool SpinSegment::hasDifficultChangeOfPosition() const
             }
         }
     }
+    return false;
+}
+bool SpinSegment::hasAllPrimaryPositions() const
+{
+    bool hasCamel = false;
+    bool hasSit = false;
+    bool hasUpright = false;
+    bool hasLayback = false;
+    for(size_t j=0;j<this->spinPositions.size();j++)
+    {
+        if(this->spinPositions.at(j).position=='c')
+            hasCamel = true;
+        else if(this->spinPositions.at(j).position=='s')
+            hasSit = true;
+        else if(this->spinPositions.at(j).position=='u')
+            hasUpright = true;
+        else if(this->spinPositions.at(j).position=='l')
+            hasLayback = true;
+    }
+    if(hasCamel && hasSit && (hasUpright||hasLayback))
+        return true;
     return false;
 }
 std::string SpinSegment::getDirectionString() const
