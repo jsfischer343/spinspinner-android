@@ -49,6 +49,7 @@ import com.example.figureskatingspinspinner.data.SpinSegment
 import com.example.figureskatingspinspinner.data.spinOptionsDataStore
 import com.example.figureskatingspinspinner.ui.theme.getColorAppropriateResource
 import kotlinx.coroutines.launch
+import kotlin.text.lowercase
 
 const val DEBUG_MODE = false
 @Composable
@@ -92,17 +93,7 @@ fun SpinnerFrame() {
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onSurface),
                 onClick = {
                 scope.launch {
-                    var commandString: String = "-c"
-                    val spinLevel = spinOptionsDataStoreManager.get(SpinOptions.Dropdown.SpinLevel.label)
-                    val spinType = spinOptionsDataStoreManager.get(SpinOptions.Dropdown.SpinType.label)?.lowercase()
-                    val spinDirection = spinOptionsDataStoreManager.get(SpinOptions.Dropdown.SpinDirection.label)?.lowercase()
-                    val normalize = spinOptionsDataStoreManager.get(SpinOptions.Toggle.Normalize.label)
-                    if(spinLevel=="Any") commandString += " -l any"
-                    else if(spinLevel=="Base") commandString += " -l 0"
-                    else commandString += " -l $spinLevel"
-                    if(spinDirection=="clockwise")  commandString += " -r"
-                    commandString += " -t $spinType"
-                    if(normalize=="true") commandString += " -b"
+                    val commandString = buildSpinCommandString(spinOptionsDataStoreManager)
                     nativeSpinCode = NativeInterface.spinSpinnerCommand(commandString)
                 }
             }
@@ -117,6 +108,28 @@ fun SpinnerFrame() {
     }
 }
 
+suspend fun buildSpinCommandString(spinOptionsDataStoreManager: DataStoreManager): String {
+    var commandString: String = "-c"
+    val spinLevel = spinOptionsDataStoreManager.get(SpinOptions.Dropdown.SpinLevel.label)
+    val spinType = spinOptionsDataStoreManager.get(SpinOptions.Dropdown.SpinType.label)?.lowercase()
+    val spinDirection = spinOptionsDataStoreManager.get(SpinOptions.Dropdown.SpinDirection.label)?.lowercase()
+    val normalize = spinOptionsDataStoreManager.get(SpinOptions.Toggle.Normalize.label)
+    val ruleSet = spinOptionsDataStoreManager.get(SpinOptions.Dropdown.RuleSet.label)
+
+    if(spinLevel=="Any") commandString += " -l any"
+    else if(spinLevel=="Base") commandString += " -l 0"
+    else commandString += " -l $spinLevel"
+    if(spinDirection=="clockwise")  commandString += " -r"
+    commandString += " -t $spinType"
+    if(normalize=="true") commandString += " -b"
+
+    if(ruleSet=="Adult Junior-Senior") commandString += " --adult-junior-senior"
+    else if(ruleSet=="Adult Intermediate-Novice") commandString += " --adult-intermediate-novice"
+    else if(ruleSet=="Adult Gold") commandString += " --adult-gold"
+    else if(ruleSet=="Adult Silver") commandString += " --adult-silver"
+    else if(ruleSet=="Adult Bronze") commandString += " --adult-bronze"
+    return commandString
+}
 @Composable
 fun SpinSpunOutput(
     debugSpinCode: String,

@@ -30,8 +30,14 @@ sealed class SpinOptions {
             override val defaultOption = "Counterclockwise"
         }
 
+        object RuleSet : Dropdown() {
+            override val label = "Rule Set"
+            override val options: Array<String> = arrayOf("Standard","Adult Junior-Senior", "Adult Intermediate-Novice", "Adult Gold", "Adult Silver", "Adult Bronze")
+            override val defaultOption = "Standard"
+        }
+
         private object Initializer { //this is needed because of the problematic way that companion object is initialized before class objects :(
-            val allDropdownsList: List<Dropdown> = listOf(SpinType,SpinLevel,SpinDirection)
+            val allDropdownsList: List<Dropdown> = listOf(SpinType,SpinLevel,SpinDirection,RuleSet)
         }
         companion object {
             val allDropdownsList: List<Dropdown> get() = Initializer.allDropdownsList
@@ -55,11 +61,12 @@ sealed class SpinOptions {
     }
 
     private object Initializer { //this is needed because of the problematic way that companion object is initialized before class objects :(
-        val allOptionsList: List<SpinOptions> = listOf(Dropdown.SpinType,Dropdown.SpinLevel,Dropdown.SpinDirection,Toggle.Normalize)
+        val allOptionsList: List<SpinOptions> = listOf(Dropdown.SpinType,Dropdown.SpinLevel,Dropdown.SpinDirection,Dropdown.RuleSet,Toggle.Normalize)
         val defaults: Map<String,String> = mapOf(
             Dropdown.SpinType.label to Dropdown.SpinType.defaultOption,
             Dropdown.SpinLevel.label to Dropdown.SpinLevel.defaultOption,
             Dropdown.SpinDirection.label to Dropdown.SpinDirection.defaultOption,
+            Dropdown.RuleSet.label to Dropdown.RuleSet.defaultOption,
             Toggle.Normalize.label to Toggle.Normalize.state
         )
     }
