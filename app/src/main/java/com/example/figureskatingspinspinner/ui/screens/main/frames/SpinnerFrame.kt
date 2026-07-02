@@ -1,9 +1,7 @@
 package com.example.figureskatingspinspinner.ui.screens.main.frames
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,7 +17,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -29,34 +26,32 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.figureskatingspinspinner.data.SpinOptions
 import com.example.figureskatingspinspinner.R
 import com.example.figureskatingspinspinner.data.DataStoreManager
 import com.example.figureskatingspinspinner.data.NativeInterface
 import com.example.figureskatingspinspinner.data.Spin
+import com.example.figureskatingspinspinner.data.SpinOptions
 import com.example.figureskatingspinspinner.data.SpinSegment
 import com.example.figureskatingspinspinner.data.spinOptionsDataStore
 import com.example.figureskatingspinspinner.ui.theme.getColorAppropriateResource
 import kotlinx.coroutines.launch
-import kotlin.text.lowercase
 
 const val DEBUG_MODE = true
 @Composable
 fun SpinnerFrame() {
     val localContext = LocalContext.current
     val spinOptionsDataStoreManager = DataStoreManager(localContext.spinOptionsDataStore)
-    var nativeSpinCode by remember { mutableStateOf("") }
+    var nativeSpinCode by rememberSaveable { mutableStateOf("") }
     val scope = rememberCoroutineScope()
     val spin = Spin(nativeSpinCode)
 
@@ -120,7 +115,8 @@ suspend fun buildSpinCommandString(spinOptionsDataStoreManager: DataStoreManager
     else if(spinLevel=="Base") commandString += " -l 0"
     else commandString += " -l $spinLevel"
     if(spinDirection=="clockwise")  commandString += " -r"
-    commandString += " -t $spinType"
+    if(spinType=="2 foot") commandString += " -t 2ft"
+    else commandString += " -t $spinType"
     if(normalize=="true") commandString += " -b"
 
     if(ruleSet=="Adult Junior-Senior") commandString += " --adult-junior-senior"

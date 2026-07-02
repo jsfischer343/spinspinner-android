@@ -8,13 +8,11 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavHostController
-import com.example.figureskatingspinspinner.R
 import com.example.figureskatingspinspinner.ui.screens.MainScreen
 import com.example.figureskatingspinspinner.ui.screens.main.frames.OptionsFrame
 import com.example.figureskatingspinspinner.ui.screens.main.frames.ResourcesFrame
 import com.example.figureskatingspinspinner.ui.screens.main.frames.SpinnerFrame
 import com.example.figureskatingspinspinner.ui.screens.settings.SettingsScreen
-//import com.example.figureskatingspinspinner.ui.screens.spinhistory.SpinHistoryScreen
 import com.example.figureskatingspinspinner.ui.theme.getColorAppropriateHTMLFile
 import com.example.figureskatingspinspinner.utils.HTMLViewScreen
 

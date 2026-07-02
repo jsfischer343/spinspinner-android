@@ -1,7 +1,6 @@
 package com.example.figureskatingspinspinner.ui.screens.settings
 
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -31,13 +30,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getString
+import androidx.core.net.toUri
 import androidx.navigation.NavHostController
 import com.example.figureskatingspinspinner.R
 import com.example.figureskatingspinspinner.navigateSingleTop
+import com.example.figureskatingspinspinner.popBackStackSafe
 import com.example.figureskatingspinspinner.ui.navigation.Destination
 import com.example.figureskatingspinspinner.ui.theme.getColorAppropriateResource
-import androidx.core.net.toUri
-import com.example.figureskatingspinspinner.popBackStackSafe
 
 
 @Composable

@@ -14,8 +14,17 @@ sealed class SpinOptions {
 
         object SpinType : Dropdown() {
             override val label = "Spin Type"
-            override val options: Array<String> = arrayOf("Any","Camel","Sit","Upright","Layback","Combo")
+            override var options: Array<String> = arrayOf("Any","Camel","Sit","Upright","Layback","Combo")
             override val defaultOption = "Any"
+
+            fun updateOptionsForRuleSet(ruleSet: String) {
+                if(ruleSet=="Adult Bronze") options = arrayOf("Any","Camel","Sit","Upright","Layback","Combo","2 Foot")
+                else options = arrayOf("Any","Camel","Sit","Upright","Layback","Combo")
+            }
+            fun getValidType(ruleSet: String, currentType: String): String {
+                if(ruleSet!="Adult Bronze" && currentType=="2 Foot") return "Any"
+                else return currentType
+            }
         }
 
         object SpinLevel : Dropdown() {
@@ -69,7 +78,7 @@ sealed class SpinOptions {
         abstract val state: String
 
         object Normalize : Toggle() {
-            override val label = "Normalize"
+            override val label = "Less Weirdness"
             override val state = "true"
         }
 
@@ -99,6 +108,7 @@ sealed class SpinOptions {
         fun initDefaults(currentDataStoreManager: DataStoreManager) {
             val currentRuleSet = currentDataStoreManager.getBlocking(Dropdown.RuleSet.label)
             Dropdown.SpinLevel.updateOptionsForRuleSet(currentRuleSet)
+            Dropdown.SpinType.updateOptionsForRuleSet(currentRuleSet)
         }
 
         //Function used when user selects new option in option menu. This function assures that options are not incompatible (i.e. Adult Silver rule set attempting to spin a level 4 spin)
@@ -108,6 +118,11 @@ sealed class SpinOptions {
                 val nextLevel = Dropdown.SpinLevel.getValidLevel(newOption, currentLevel)
                 Dropdown.SpinLevel.updateOptionsForRuleSet(newOption)
                 if(nextLevel!=currentLevel) currentDataStoreManager.save(Dropdown.SpinLevel.label,nextLevel)
+
+                val currentType = currentDataStoreManager.get(Dropdown.SpinType.label)
+                val nextType = Dropdown.SpinType.getValidType(newOption, currentType)
+                Dropdown.SpinType.updateOptionsForRuleSet(newOption)
+                if(currentType!=nextType) currentDataStoreManager.save(Dropdown.SpinType.label,nextType)
             }
             currentDataStoreManager.save(dropDown.label,newOption)
         }
