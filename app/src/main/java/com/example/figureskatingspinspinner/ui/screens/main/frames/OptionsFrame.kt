@@ -49,6 +49,7 @@ fun OptionsFrame() {
         modifier = Modifier.fillMaxSize().padding(4.dp).verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
         SpinOptions.Dropdown.allDropdownsList.forEach {
             OptionsFrame_DropdownCard(it)
         }
@@ -112,7 +113,8 @@ fun OptionsFrame_DropdownCard(dropdown: SpinOptions.Dropdown) {
             {dropdownExpanded = false},
             { option ->
                 scope.launch {
-                    spinOptionsDataStoreManager.save(dropdown.label,option)
+                    //logic to cross check current spin level with the allowed level for each adult ruleset
+                    SpinOptions.safeUpdateOptions(dropdown,option,spinOptionsDataStoreManager)
                 }
                 dropdownExpanded = false
             }

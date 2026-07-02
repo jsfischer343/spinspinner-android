@@ -20,8 +20,29 @@ sealed class SpinOptions {
 
         object SpinLevel : Dropdown() {
             override val label = "Spin Level"
-            override val options: Array<String> = arrayOf("Any","Base","1","2","3","4")
+            override var options: Array<String> = arrayOf("Any","Base","1","2","3","4")
             override val defaultOption = "Base"
+            fun updateOptionsForRuleSet(ruleSet: String) {
+                when(ruleSet) {
+                    "Standard" -> options = arrayOf("Any","Base","1","2","3","4")
+                    "Adult Junior-Senior" -> options = arrayOf("Any","Base","1","2","3","4")
+                    "Adult Intermediate-Novice" -> options = arrayOf("Any","Base","1","2","3","4")
+                    "Adult Gold" -> options = arrayOf("Any","Base","1","2","3")
+                    "Adult Silver" -> options = arrayOf("Any","Base","1","2")
+                    "Adult Bronze" -> options = arrayOf("Any","Base","1")
+                }
+            }
+            fun getValidLevel(ruleSet: String, currentLevel: String): String {
+                return when(ruleSet) {
+                    "Standard" -> currentLevel
+                    "Adult Junior-Senior" -> currentLevel
+                    "Adult Intermediate-Novice" -> currentLevel
+                    "Adult Gold" -> if(currentLevel !in arrayOf("Any","Base","1","2","3")) "3" else currentLevel
+                    "Adult Silver" -> if(currentLevel !in arrayOf("Any","Base","1","2")) "2" else currentLevel
+                    "Adult Bronze" -> if(currentLevel !in arrayOf("Any","Base","1")) "1" else currentLevel
+                    else -> "Any"
+                }
+            }
         }
 
         object SpinDirection : Dropdown() {
@@ -73,5 +94,25 @@ sealed class SpinOptions {
     companion object {
         val allOptionsList: List<SpinOptions> get() = Initializer.allOptionsList
         val defaults: Map<String,String> get() = Initializer.defaults
+
+        //Ran once each time the app starts to update default selection of options or anything dependent on the user's last option selection
+        fun initDefaults(currentDataStoreManager: DataStoreManager) {
+            val currentRuleSet = currentDataStoreManager.getBlocking(Dropdown.RuleSet.label)
+            Dropdown.SpinLevel.updateOptionsForRuleSet(currentRuleSet)
+        }
+
+        //Function used when user selects new option in option menu. This function assures that options are not incompatible (i.e. Adult Silver rule set attempting to spin a level 4 spin)
+        suspend fun safeUpdateOptions(dropDown: Dropdown, newOption: String, currentDataStoreManager: DataStoreManager) {
+            if(dropDown.label==Dropdown.RuleSet.label) {
+                val currentLevel = currentDataStoreManager.get(Dropdown.SpinLevel.label)
+                val nextLevel = Dropdown.SpinLevel.getValidLevel(newOption, currentLevel)
+                Dropdown.SpinLevel.updateOptionsForRuleSet(newOption)
+                if(nextLevel!=currentLevel) currentDataStoreManager.save(Dropdown.SpinLevel.label,nextLevel)
+            }
+            currentDataStoreManager.save(dropDown.label,newOption)
+        }
+        //overloading for toggle options (note: currently unused)
+        suspend fun safeUpdateOptions(toggle: Toggle, newOption: String, currentDataStoreManager: DataStoreManager) {
+        }
     }
 }

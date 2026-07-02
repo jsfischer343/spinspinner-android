@@ -18,6 +18,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         val spinOptionsDataStoreManager = DataStoreManager(this.spinOptionsDataStore)
         spinOptionsDataStoreManager.initDefaults(SpinOptions.defaults)
+        SpinOptions.initDefaults(spinOptionsDataStoreManager)
         setContent {
             FigureSkatingSpinSpinnerTheme {
                 SpinSpinnerApp()

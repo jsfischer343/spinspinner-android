@@ -51,7 +51,7 @@ import com.example.figureskatingspinspinner.ui.theme.getColorAppropriateResource
 import kotlinx.coroutines.launch
 import kotlin.text.lowercase
 
-const val DEBUG_MODE = false
+const val DEBUG_MODE = true
 @Composable
 fun SpinnerFrame() {
     val localContext = LocalContext.current
@@ -145,24 +145,42 @@ fun SpinSpunOutput(
         if(showDebugSpinCode) Text(text = "Debug: $debugSpinCode")
         ISUSpinCode(spin.getISUSpinCodeAsText())
         Spacer(modifier = Modifier.padding(16.dp))
-        if(spin.isFlying) {
-            FlyCard(spin.spinFeatures.difficultEntrance)
-            DownArrowSeparator()
+        if(spin.baseType=='2') {
+            //2FtUSp
+            TwoFtUSpCard(spin.spinSegments[0].direction)
         }
-        else if(spin.spinFeatures.difficultEntrance) {
-            DifficultEntranceCard()
-            DownArrowSeparator()
-        }
-        for(i in 0 until spin.spinSegments.size) {
-            SpinSegmentCard(spin.spinSegments[i])
-            if(i<spin.spinSegments.size-1) {
-                if(spin.spinFeatures.changeFootByJump) Text(text = "- Jump -")
-                else DownArrowSeparator()
+        else {
+            if(spin.isFlying) {
+                FlyCard(spin.spinFeatures.difficultEntrance)
+                DownArrowSeparator()
             }
-        }
-        if(spin.spinFeatures.difficultExit) {
-            DownArrowSeparator()
-            DifficultExitCard()
+            else if(spin.spinFeatures.difficultEntrance) {
+                DifficultEntranceCard()
+                DownArrowSeparator()
+            }
+            for(i in 0 until spin.spinSegments.size) {
+                SpinSegmentCard(spin.spinSegments[i])
+                if(i<spin.spinSegments.size-1) {
+                    if(spin.spinFeatures.changeFootByJump) Text(text = "- Jump -")
+                    else DownArrowSeparator()
+                }
+            }
+            if(spin.spinFeatures.difficultExit) {
+                DownArrowSeparator()
+                DifficultExitCard()
+            }
+            if(spin.spinFeatures.cleanChangeFootSpin) {
+                Spacer(modifier = Modifier.fillMaxWidth().height(8.dp))
+                AdultFeatureCard("Both side must achieve clear basic positions.")
+            }
+            if(spin.spinFeatures.allThreeBasicPositionsAnywhere) {
+                Spacer(modifier = Modifier.fillMaxWidth().height(8.dp))
+                AdultFeatureCard("All three basic positions must be achieved.")
+            }
+            if(spin.spinFeatures.allThreeBasicPositionOnSecondFoot) {
+                Spacer(modifier = Modifier.fillMaxWidth().height(8.dp))
+                AdultFeatureCard("All three basic positions must be achieved on the second foot.")
+            }
         }
     }
 }
@@ -241,6 +259,70 @@ fun SpinSegmentCard(
                         Text(text = "+")
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun TwoFtUSpCard(
+    spinDirection: Char
+) {
+    //direction
+    var directionContentDesc: String
+    var directionColor: Color
+    var directionResLight: Int
+    var directionResDark: Int
+    if(spinDirection=='r') {
+        directionContentDesc = "Counterclockwise"
+        directionColor = MaterialTheme.colorScheme.secondary
+        directionResLight = R.drawable.rotate_left_24dp_000000_fill0_wght400_grad0_opsz24
+        directionResDark = R.drawable.rotate_left_24dp_ffffff_fill0_wght400_grad0_opsz24
+    }
+    else {
+        directionContentDesc = "Clockwise"
+        directionColor = MaterialTheme.colorScheme.tertiary
+        directionResLight = R.drawable.rotate_right_24dp_000000_fill0_wght400_grad0_opsz24
+        directionResDark = R.drawable.rotate_right_24dp_ffffff_fill0_wght400_grad0_opsz24
+    }
+
+    ElevatedCard(
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp).fillMaxWidth().wrapContentHeight(Alignment.CenterVertically)
+    ) {
+        Column(
+            modifier = Modifier.padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Box(
+                    modifier = Modifier.background(directionColor, shape = CircleShape).padding(4.dp)
+                ) {
+                    //direction indicator
+                    Image(
+                        painter = painterResource(
+                            getColorAppropriateResource(
+                                directionResLight,
+                                directionResDark)
+                        ),
+                        contentDescription = directionContentDesc
+                    )
+                }
+                //footness
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {}
+            }
+            //position
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(text = "2 Foot Upright")
             }
         }
     }
@@ -338,4 +420,27 @@ fun DownArrowSeparator() {
         ),
         contentDescription = "Arrow cool down"
     )
+}
+
+@Composable
+fun AdultFeatureCard(
+    text: String
+) {
+    ElevatedCard(
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp).fillMaxWidth().wrapContentHeight(Alignment.CenterVertically)
+    ) {
+        Column(
+            modifier = Modifier.padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(text = "*Adult Feature: $text")
+            }
+        }
+    }
 }

@@ -36,10 +36,24 @@ class DataStoreManager( //makes modifications to the provided dataStore in the c
             it[stringPreferencesKey(key)] = value
         }
     }
-    suspend fun get(key: String): String? {
+    fun saveBlocking(key: String, value: String) {
+        runBlocking {
+            dataStore.edit {
+                it[stringPreferencesKey(key)] = value
+            }
+        }
+    }
+    suspend fun get(key: String): String {
         return dataStore.data.map {
             it[stringPreferencesKey(key)] ?: ""
-        }.firstOrNull()
+        }.firstOrNull() ?: ""
+    }
+    fun getBlocking(key: String): String {
+        return runBlocking {
+            dataStore.data.map {
+                it[stringPreferencesKey(key)] ?: ""
+            }.firstOrNull() ?: ""
+        }
     }
     fun getFlowObj(key: String): Flow<String> {
         return dataStore.data.map {
