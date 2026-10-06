@@ -24,7 +24,6 @@
 #define ADD_VARIATION_PROB 0.32
 #define ADD_SPIN_FEATURE_PROB 0.19
 #define ADD_POSITION_FEATURE_PROB 0.23
-#define ADD_INTERMEDIATE_POSITION_PROB 0.13 //only affects combo spins
 #define ADD_CHANGE_OF_DIRECTION_PROB 0.13
 
 //Probability of allowing stacking features or variations on same position
@@ -57,6 +56,7 @@ class SpinSpinner
         bool defaultDirection = false; //false: counter-clockwise, true: clockwise
         bool normalize = true;
         AdultRuleFlags adultRuleFlags;
+        bool throwCurrentSpinAway = false; //used for rare cases where valid level 4 can't be found with current spin structure and spin is thrown away
         std::vector<Spin> spinHistory = {}; //every time one of the spin functions is called it will push to this list
 
         SpinSpinner(bool defaultDirection, bool normalize, AdultRuleFlags adultRuleFlags);
@@ -80,7 +80,6 @@ class SpinSpinner
             bool addVariation();
             bool addSpinFeature();
             bool addPositionFeature();
-            bool addIntermediatePosition();
             bool addChangeOfDirection();
             int pickRandomBulletType();
             SpinPosition* pickNonConflictingPosition();

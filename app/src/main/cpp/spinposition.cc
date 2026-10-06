@@ -212,8 +212,6 @@ std::string SpinPosition::getPositionString(bool codeFormat) const
             return "U";
         else if(position=='l')
             return "L";
-        else if(position=='i')
-            return "I";
         return "";
     }
     else
@@ -226,8 +224,6 @@ std::string SpinPosition::getPositionString(bool codeFormat) const
             return "upright";
         else if(position=='l')
             return "layback";
-        else if(position=='i')
-            return "intermediate";
         return "";
     }
 }

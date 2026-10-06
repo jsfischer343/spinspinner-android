@@ -29,7 +29,6 @@ class Spin
         SpinFeatures features;
 
         //flags
-        bool intermediatePositionFlag = false;
         bool twoVariationsFlag = false; //only the first two difficult variations count towards levels
         bool changeDirectionFlag = false;
 

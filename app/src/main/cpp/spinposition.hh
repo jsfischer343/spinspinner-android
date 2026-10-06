@@ -20,13 +20,13 @@ class SpinPosition
 {
     public:
         /* --Valid Settings--
-         * position: camel -> 'c'; sit -> 's'; upright -> 'u'; layback -> 'l'; intermediate -> 'i'
+         * position: camel -> 'c'; sit -> 's'; upright -> 'u'; layback -> 'l';
          * variation: up -> 'u'; front -> 'f'; behind -> 'b'; side -> 's'; biellmann -> 'm'; straight -> 't'
          * features: blade -> 'b'; coe -> 'c'; jump -> 'j'; 8 revs -> '8'; speed -> 's'; windmill -> 'w'
          * adult specific features: 5 revs -> '5';
          */
         SpinSegment* parent;
-        char position = -1; //basic position: camel, sit, upright, layback, intermediate
+        char position = -1; //basic position: camel, sit, upright, layback
         std::vector<char> variations = {}; //change of body making spin position more difficult
         std::vector<char> features = {}; //features that are associated with a specific position (see spin features)
 

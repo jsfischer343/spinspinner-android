@@ -44,6 +44,11 @@ void SpinSpinner::spin()
 
     setRandomBaseQualities(); //sets fly and change foot properties
     generateSpin();
+    if(throwCurrentSpinAway) {
+        throwCurrentSpinAway = false;
+        spinHistory.pop_back();
+        spin();
+    }
 }
 void SpinSpinner::spin(int level)
 {
@@ -84,6 +89,11 @@ void SpinSpinner::spin(int level)
 
     setRandomBaseQualities(); //sets fly and change foot properties
     generateSpin();
+    if(throwCurrentSpinAway) {
+        throwCurrentSpinAway = false;
+        spinHistory.pop_back();
+        spin(level);
+    }
 }
 void SpinSpinner::spin(char type, int level)
 {
@@ -100,6 +110,11 @@ void SpinSpinner::spin(char type, int level)
 
     setRandomBaseQualities(); //sets fly and change foot properties
     generateSpin();
+    if(throwCurrentSpinAway) {
+        throwCurrentSpinAway = false;
+        spinHistory.pop_back();
+        spin(type,level);
+    }
 }
 void SpinSpinner::generateSpin()
 {
@@ -524,14 +539,7 @@ bool SpinSpinner::addLevel()
                     else
                         continue;
                 }
-                else if(randomSelect==3) //only for combos
-                {
-                    if(addIntermediatePosition())
-                        break;
-                    else
-                        continue;
-                }
-                else if(randomSelect==4) //only for change foot spins
+                else if(randomSelect==3) //only for change foot spins
                 {
                     if(addChangeOfDirection())
                         break;
@@ -635,6 +643,8 @@ bool SpinSpinner::addSpinFeature()
 bool SpinSpinner::addPositionFeature()
 {
     SpinPosition* randomPosition = pickNonConflictingPosition();
+    if(randomPosition==nullptr)
+        return false;
     char randomFeature;
     if(adultRuleFlags.gold || adultRuleFlags.silver || adultRuleFlags.bronze) //tell pickRandomFeature to switch to 5 rev instead of 8
         randomFeature = randomPosition->pickRandomFeature(true);
@@ -648,17 +658,6 @@ bool SpinSpinner::addPositionFeature()
     if(randomPosition->addFeature(randomFeature,normalize))
         return true;
     return false;
-}
-bool SpinSpinner::addIntermediatePosition()
-{
-    if(currentSpin.intermediatePositionFlag)
-        return false;
-    int randomSegmentIndex = easyRandom::range(0,currentSpin.spinSegments.size()-1);
-    SpinSegment* randomSegment = &currentSpin.spinSegments.at(randomSegmentIndex);
-    int randomSpinPositionIndex = easyRandom::range(0,randomSegment->spinPositions.size()-1);
-    randomSegment->spinPositions.insert(randomSegment->spinPositions.begin()+randomSpinPositionIndex+1,SpinPosition(randomSegment,'i'));
-    currentSpin.intermediatePositionFlag = true;
-    return true;
 }
 bool SpinSpinner::addChangeOfDirection()
 {
@@ -692,91 +691,65 @@ bool SpinSpinner::addChangeOfDirection()
 }
 int SpinSpinner::pickRandomBulletType()
 {
-    //0: difficult variation, 1: spin feature, 2: position feature, 3: intermediate position 4: change of direction
+    //0: difficult variation, 1: spin feature, 2: position feature, 4: change of direction
     int select = -1;
     std::vector<int> selectFromVector;
     std::vector<double> selectVectorWeights;
-
-    /*--TEMP--
-    //special exception: used to balance out lack of 8rev features in level 2 sit (and combo) spins (due to the requirment that the position have a DV)
-    if((currentSpin.baseType=='s'||currentSpin.baseType=='k') && (targetLevel==2 && currentSpin.level==0)) //if first bullet of level 2 sit or combo
-        return 0; //select a DV for first bullet
-        */
-
-    if(currentSpin.baseType=='k')
+    if(currentSpin.isChangeFoot)
     {
-        if(currentSpin.isChangeFoot)
-        {
-            selectFromVector = std::vector<int>{0,1,2,3,4};
-            selectVectorWeights = std::vector<double>{ADD_VARIATION_PROB,ADD_SPIN_FEATURE_PROB,ADD_POSITION_FEATURE_PROB,ADD_INTERMEDIATE_POSITION_PROB,ADD_CHANGE_OF_DIRECTION_PROB};
-        }
-        else
-        {
-            selectFromVector = std::vector<int>{0,1,2,3};
-            selectVectorWeights = std::vector<double>{ADD_VARIATION_PROB,ADD_SPIN_FEATURE_PROB,ADD_POSITION_FEATURE_PROB,ADD_INTERMEDIATE_POSITION_PROB};
-        }
+        selectFromVector = std::vector<int>{0,1,2,3};
+        selectVectorWeights = std::vector<double>{ADD_VARIATION_PROB,ADD_SPIN_FEATURE_PROB,ADD_POSITION_FEATURE_PROB,ADD_CHANGE_OF_DIRECTION_PROB};
     }
     else
     {
-        if(currentSpin.isChangeFoot)
-        {
-            selectFromVector = std::vector<int>{0,1,2,4};
-            selectVectorWeights = std::vector<double>{ADD_VARIATION_PROB,ADD_SPIN_FEATURE_PROB,ADD_POSITION_FEATURE_PROB,ADD_CHANGE_OF_DIRECTION_PROB};
-        }
-        else
-        {
-            selectFromVector = std::vector<int>{0,1,2};
-            selectVectorWeights = std::vector<double>{ADD_VARIATION_PROB,ADD_SPIN_FEATURE_PROB,ADD_POSITION_FEATURE_PROB};
-        }
+        selectFromVector = std::vector<int>{0,1,2};
+        selectVectorWeights = std::vector<double>{ADD_VARIATION_PROB,ADD_SPIN_FEATURE_PROB,ADD_POSITION_FEATURE_PROB};
     }
     return easyRandom::pickFromVectorWeighted(selectFromVector, selectVectorWeights);
 }
 SpinPosition* SpinSpinner::pickNonConflictingPosition()
 {
     SpinPosition* nonConflictingPosition = nullptr;
-    do
+    if(!currentSpin.isChangeFoot) //not change foot spin
     {
-        if(!currentSpin.isChangeFoot) //not change foot spin
+        int randomIndex = easyRandom::range(0,currentSpin.spinSegments.at(0).spinPositions.size()-1);
+        nonConflictingPosition = &currentSpin.spinSegments.at(0).spinPositions.at(randomIndex);
+    }
+    else //is change foot spin (need to check for only 2 bullets on each foot)
+    {
+        int bulletsOnFirstSegment = currentSpin.spinSegments.at(0).getBulletCount();
+        int bulletsOnSecondSegment = currentSpin.spinSegments.at(1).getBulletCount();
+        if(adultRuleFlags.active)
+        {
+            if(currentSpin.features.cleanChangeFootSpin) //awarded to second foot
+                bulletsOnSecondSegment++;
+        }
+
+        //special exception: if by accident a difficult change of position occurs on both segments then only count first one
+        if(currentSpin.spinSegments.at(0).features.difficultChangeOfPosition && currentSpin.spinSegments.at(1).features.difficultChangeOfPosition)
+            bulletsOnSecondSegment--;
+
+        if(bulletsOnFirstSegment==2 && bulletsOnSecondSegment<2) //1. 2 bullets on first side
+        {
+            int randomIndex = easyRandom::range(0,currentSpin.spinSegments.at(1).spinPositions.size()-1);
+            nonConflictingPosition = &currentSpin.spinSegments.at(1).spinPositions.at(randomIndex);
+        }
+        else if(bulletsOnFirstSegment<2 && bulletsOnSecondSegment==2) //2. 2 bullets on second side
         {
             int randomIndex = easyRandom::range(0,currentSpin.spinSegments.at(0).spinPositions.size()-1);
             nonConflictingPosition = &currentSpin.spinSegments.at(0).spinPositions.at(randomIndex);
         }
-        else //is change foot spin (need to check for only 2 bullets on each foot)
+        else if(bulletsOnFirstSegment<2 && bulletsOnSecondSegment<2) //3. less than 2 bullets on both sides
         {
-            int bulletsOnFirstSegment = currentSpin.spinSegments.at(0).getBulletCount();
-            int bulletsOnSecondSegment = currentSpin.spinSegments.at(1).getBulletCount();
-            if(adultRuleFlags.active)
-            {
-                if(currentSpin.features.cleanChangeFootSpin) //awarded to second foot
-                    bulletsOnSecondSegment++;
-            }
-
-            //special exception: if by accident a difficult change of position occurs on both segments then only count first one
-            if(currentSpin.spinSegments.at(0).features.difficultChangeOfPosition && currentSpin.spinSegments.at(1).features.difficultChangeOfPosition)
-                bulletsOnSecondSegment--;
-
-            if(bulletsOnFirstSegment==2 && bulletsOnSecondSegment<2) //1. 2 bullets on first side
-            {
-                int randomIndex = easyRandom::range(0,currentSpin.spinSegments.at(1).spinPositions.size()-1);
-                nonConflictingPosition = &currentSpin.spinSegments.at(1).spinPositions.at(randomIndex);
-            }
-            else if(bulletsOnFirstSegment<2 && bulletsOnSecondSegment==2) //2. 2 bullets on second side
-            {
-                int randomIndex = easyRandom::range(0,currentSpin.spinSegments.at(0).spinPositions.size()-1);
-                nonConflictingPosition = &currentSpin.spinSegments.at(0).spinPositions.at(randomIndex);
-            }
-            else if(bulletsOnFirstSegment<2 && bulletsOnSecondSegment<2) //3. less than 2 bullets on both sides
-            {
-                int randomSegmentIndex = easyRandom::range(0,1);
-                int randomIndex = easyRandom::range(0,currentSpin.spinSegments.at(randomSegmentIndex).spinPositions.size()-1);
-                nonConflictingPosition = &currentSpin.spinSegments.at(randomSegmentIndex).spinPositions.at(randomIndex);
-            }
-            else
-            {
-                throw; //when adding levels properly there should never be more than 2 bullets on each foot and 4 bullets total in change foot spins
-            }
+            int randomSegmentIndex = easyRandom::range(0,1);
+            int randomIndex = easyRandom::range(0,currentSpin.spinSegments.at(randomSegmentIndex).spinPositions.size()-1);
+            nonConflictingPosition = &currentSpin.spinSegments.at(randomSegmentIndex).spinPositions.at(randomIndex);
         }
-    } while(nonConflictingPosition->position=='i'); //this while loop ensures that intermediate positions aren't selected for any features (better implementation probably exists)
+        else
+        {
+            throw; //when adding levels properly there should never be more than 2 bullets on each foot and 4 bullets total in change foot spins
+        }
+    }
     return nonConflictingPosition;
 }
 bool SpinSpinner::missingBulletForLevel4()
@@ -794,13 +767,19 @@ bool SpinSpinner::missingBulletForLevel4()
 }
 void SpinSpinner::addARequiredBulletForLevel4()
 {
+    int i=0;
     while(true) //keep looping until the rolled spin "bullet" (variation/features) doesn't conflict with any other additions (lazy implementation)
     {
+        i++;
+        if(i>30) {
+            throwCurrentSpinAway = true;
+            return;
+        }
         int randomSelect = easyRandom::pickFromVector(std::vector<int>{0,1,2,3,4,5});
 
         if(randomSelect==0) //difficult exit
         {
-            if(!currentSpin.features.difficultEntrance)
+            if(currentSpin.features.difficultEntrance==true && currentSpin.isFlying==false) //if it already has difficult entrance then can't add difficult exit
                 continue;
             currentSpin.features.difficultExit = true;
             break;
@@ -808,6 +787,8 @@ void SpinSpinner::addARequiredBulletForLevel4()
         else if(randomSelect==1) //change of edge
         {
             SpinPosition* randomPosition = pickNonConflictingPosition();
+            if(randomPosition==nullptr)
+                continue;
             if(!checkFeatureValidity(randomPosition,'c'))
                 continue;
             if(randomPosition->addFeature('c',normalize))
