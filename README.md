@@ -1,6 +1,6 @@
 <div align="center">
   <h1>SpinSpinner</h1>
-  <img src="https://github.com/jsfischer343/spinspinner-android/blob/master/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" alt="SpinSpinner.icon"/>
+  <img src="https://github.com/jsfischer343/spinspinner-android/blob/master/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" alt="SpinSpinner.icon" width="150" height="150"/>
 </div>
 
 ## About
