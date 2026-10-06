@@ -11,7 +11,7 @@ It is intended to assist skaters in coming up with leveled spins for their progr
 
 ### App Store
 TBD
-### Download ([only available until September](https://keepandroidopen.org/))
+### Download ([only available until end of 2026](https://keepandroidopen.org/))
 - Download the apk from [releases](https://github.com/jsfischer343/spinspinner-android/releases) directly to phone
 - Navigate to your downloads folder and click on the apk
 - Follow the prompts to allow for install
